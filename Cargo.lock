@@ -1,0 +1,23 @@
+[[package]]
+name = "plot-eth-scoring"
+version = "0.1.0"
+dependencies = [
+ "plotlib 0.3.0 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "plotlib"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+dependencies = [
+ "svg 0.5.12 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "svg"
+version = "0.5.12"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+
+[metadata]
+"checksum plotlib 0.3.0 (registry+https://github.com/rust-lang/crates.io-index)" = "99fada4df412db513e2d3dc3476367d32ae733d0c9d54649f148f815fe082ba2"
+"checksum svg 0.5.12 (registry+https://github.com/rust-lang/crates.io-index)" = "a863ec1f8e7cfd4ea449f77445cca06aac240b9a677ccf12b0f65ef020db52c7"
