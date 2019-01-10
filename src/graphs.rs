@@ -1,4 +1,4 @@
-use super::{DATA_LENGTH, XAxis, PlotType, algo};
+use super::{DATA_LENGTH, XAxis, PlotType};
 
 
 use plotlib::scatter::Scatter;
@@ -9,27 +9,31 @@ use plotlib::page::Page;
 
 // generates a graph based upon a boost multiplier, gas multiplier, and as price multiplier
 // if x_gas is true, show gas amount as the X-Axis
-pub fn score_graph<G, GP, B>(base_score: f64, gas: G, gp: GP, boost: B, x_axis: XAxis, plot_type: PlotType)
+pub fn score_graph<G, GP, B>(gas: G, gp: GP, boost: B, x_axis: XAxis, plot_type: PlotType)
 where
     G: Fn(usize) -> f64,
     GP: Fn(usize) -> f64,
     B: Fn(f64) -> f64
 {
-    let mut scores = Vec::new();
     let mut gas_prices = Vec::new();
     let mut gases = Vec::new();
+    let mut scores = vec![0.0; DATA_LENGTH];
     for i in 0..DATA_LENGTH {
         gas_prices.push(gp(i));
         gases.push(gas(i));
     }
 
     // reverse here because calculating from highest gp/gas -> lowest in parity-ethereum
-    let mut last_score = boost(*(gas_prices.get(gas_prices.len()-1).unwrap()));
-    for (gp, g) in gas_prices.iter().rev().zip(gases.iter().rev()) {
-        last_score = algo(last_score, *g, *gp, &boost);
-        scores.push(last_score);
-        last_score = ((last_score as u64) << 15) as f64;
+    let last_index = DATA_LENGTH - 1;
+    scores[last_index] = gas_prices[last_index];
+    for idx in (1..DATA_LENGTH).rev() {
+        let prev_idx = idx - 1;
+        let bump = ((21_000.0 * scores[idx]) /
+            gases[prev_idx]);
+        scores[prev_idx] = gas_prices[prev_idx] + (bump / 1000.0);
+        scores[idx] = boost(scores[prev_idx]);
     }
+    scores[0] = boost(scores[0]);
 
     let data = match x_axis {
         XAxis::Gas => gases.iter().zip(scores.iter()).map(|(x, y)| (*x, *y)).collect::<Vec<(f64, f64)>>(),
@@ -44,7 +48,8 @@ fn plot(data: &[(f64, f64)], x_axis: XAxis, plot_type: PlotType) {
     let s1 = Scatter::from_vec(&data)
         .style(scatter::Style::new()
             .marker(Marker::Circle)
-            .colour("#000000"));
+            .colour("#000000")
+            .size(2.0));
 
     let (range_x, range_y) = plot_type.range();
     println!("{:?}", data);
