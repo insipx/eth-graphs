@@ -31,9 +31,11 @@ where
         let bump = ((21_000.0 * scores[idx]) /
             gases[prev_idx]);
         scores[prev_idx] = gas_prices[prev_idx] + (bump / 1000.0);
-        scores[idx] = boost(scores[prev_idx]);
     }
-    scores[0] = boost(scores[0]);
+
+    for idx in (0..DATA_LENGTH).rev() {
+        scores[idx] = boost(scores[idx]);
+    }
 
     let data = match x_axis {
         XAxis::Gas => gases.iter().zip(scores.iter()).map(|(x, y)| (*x, *y)).collect::<Vec<(f64, f64)>>(),
