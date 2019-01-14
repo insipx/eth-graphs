@@ -25,7 +25,7 @@ where
 
     // reverse here because calculating from highest gp/gas -> lowest in parity-ethereum
     let last_index = DATA_LENGTH - 1;
-    scores[last_index] = gas_prices[last_index];
+    scores[last_index] = boost(gas_prices[last_index]);
     for idx in (1..DATA_LENGTH).rev() {
         let prev_idx = idx - 1;
         let bump = ((21_000.0 * scores[idx]) /
