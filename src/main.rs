@@ -51,7 +51,7 @@ impl PlotType {
     // returns a range to correspond what x/y axes should be
     pub fn range(&self) -> ((f64, f64), (f64, f64)) {
         match self {
-            PlotType::ConstantGasPriceNoBoost => ((0.0, 21_000_000.00), (20_900.0, 21_200.00)),
+            PlotType::ConstantGasPriceNoBoost => ((0.0, 21_000_000.00), (21_000.0, 40_000.00)),
             PlotType::ConstantGasNoBoost => ((0.0, 200_000.0), (0.0, 200_000.00)),
             PlotType::ConstantGasPrice => ((0.0, 200_000.00), (685_000_000.0, 696_000_000.0)),
             PlotType::ConstantGas => ((0.0, 200_000.0), (0.0, 6_500_000_000.0)),
@@ -71,11 +71,3 @@ fn main() {
     graphs::score_graph(|i| ((10_000.0) * (10.0 * i as f64)), |_| 21_000.0, |score| score, XAxis::Gas, PlotType::ConstantGasPriceNoBoost); // GOOD
     graphs::score_graph(|i| ((100.0) * (10.0 * i as f64)), |_| 21_000.0, |score| ((score as u64) << 15) as f64, XAxis::Gas, PlotType::ConstantGasPrice);// GOOD
 }
-
-fn gen_original_algorithm_plots() {
-    graphs::score_graph(|i| ((100.0) * (10.0 * i as f64)), |_| 1000.0, |score| score, XAxis::Gas, PlotType::ConstantGasPriceNoBoost);
-    graphs::score_graph(|_| 1_000_000.0, |i| ((100.0) * (10.0 * i as f64)), |score| score, XAxis::GasPrice, PlotType::ConstantGasNoBoost);
-    graphs::score_graph(|i| ((100.0) * (10.0 * i as f64)), |_| 1000.0, |score| ((score as u64) << 15) as f64, XAxis::Gas, PlotType::ConstantGasPrice);
-    graphs::score_graph(|_| 1_000_000.0, |i| ((100.0) * (10.0 * i as f64)), |score| ((score as u64) << 15) as f64, XAxis::GasPrice, PlotType::ConstantGas);
-}
-

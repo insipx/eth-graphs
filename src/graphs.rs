@@ -28,8 +28,8 @@ where
     scores[last_index] = boost(gas_prices[last_index]);
     for idx in (1..DATA_LENGTH).rev() {
         let prev_idx = idx - 1;
-        let bump = ((21_000.0 * scores[idx]) /
-            gases[prev_idx]);
+        let bump = ((21_000.0 * gases[prev_idx]) /
+            scores[idx]);
         scores[prev_idx] = boost(gas_prices[prev_idx]) + (bump / 1000.0);
     }
 
