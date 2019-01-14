@@ -30,11 +30,7 @@ where
         let prev_idx = idx - 1;
         let bump = ((21_000.0 * scores[idx]) /
             gases[prev_idx]);
-        scores[prev_idx] = gas_prices[prev_idx] + (bump / 1000.0);
-    }
-
-    for idx in (0..DATA_LENGTH).rev() {
-        scores[idx] = boost(scores[idx]);
+        scores[prev_idx] = boost(gas_prices[prev_idx]) + (bump / 1000.0);
     }
 
     let data = match x_axis {
