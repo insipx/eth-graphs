@@ -51,7 +51,7 @@ impl PlotType {
     // returns a range to correspond what x/y axes should be
     pub fn range(&self) -> ((f64, f64), (f64, f64)) {
         match self {
-            PlotType::ConstantGasPriceNoBoost => ((0.0, 20_000_000.00), (21_000.0, 40_000.0)),
+            PlotType::ConstantGasPriceNoBoost => ((0.0, 20_000_000.00), (20_995.0, 21_010.0)),
             PlotType::ConstantGasNoBoost => ((0.0, 200_000.0), (0.0, 200_000.00)),
             PlotType::ConstantGasPrice => ((0.0, 200_000.00), (685_000_000.0, 696_000_000.0)),
             PlotType::ConstantGas => ((0.0, 200_000.0), (0.0, 6_500_000_000.0)),
