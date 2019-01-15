@@ -2,6 +2,12 @@ mod graphs;
 
 pub const DATA_LENGTH: usize = 200;
 
+pub struct DataSet {
+    data: Vec<f64, f64>,
+    x_axis: XAxis,
+    plot_type: PlotType
+}
+
 pub enum XAxis {
     Gas,
     GasPrice

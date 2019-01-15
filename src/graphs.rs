@@ -1,4 +1,4 @@
-use super::{DATA_LENGTH, XAxis, PlotType};
+use super::{DATA_LENGTH, XAxis, PlotType, DataSet};
 
 
 use plotlib::scatter::Scatter;
@@ -9,7 +9,7 @@ use plotlib::page::Page;
 
 // generates a graph based upon a boost multiplier, gas multiplier, and as price multiplier
 // if x_gas is true, show gas amount as the X-Axis
-pub fn score_graph<G, GP, B>(gas: G, gp: GP, boost: B, x_axis: XAxis, plot_type: PlotType)
+pub fn score_graph<G, GP, B>(gas: G, gp: GP, boost: B, x_axis: XAxis, plot_type: PlotType) -> DataSet
 where
     G: Fn(usize) -> f64,
     GP: Fn(usize) -> f64,
@@ -40,10 +40,11 @@ where
         XAxis::GasPrice => gas_prices.iter().zip(scores.iter()).map(|(x, y)| (*x, *y)).collect::<Vec<(f64, f64)>>(),
     };
 
-    plot(&data, x_axis, plot_type);
+    DataSet {data, x_axis, plot_type}
 }
+
 // X, Y; X = Gas  prices, Y = Score
-fn plot(data: &[(f64, f64)], x_axis: XAxis, plot_type: PlotType) {
+fn plot(Vec<DataSet>) {
 
     let s1 = Scatter::from_vec(&data)
         .style(scatter::Style::new()
