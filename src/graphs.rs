@@ -1,5 +1,5 @@
-use super::{DATA_LENGTH, XAxis, PlotType, DataSet};
-
+use super::{DATA_LENGTH, PlotType, DataSet};
+use super::algorithms::{AlgOpts, pr, option1, option2};
 
 use plotlib::scatter::Scatter;
 use plotlib::scatter;
@@ -7,62 +7,61 @@ use plotlib::style::{Marker, Point};
 use plotlib::view::View;
 use plotlib::page::Page;
 
-// generates a graph based upon a boost multiplier, gas multiplier, and as price multiplier
-// if x_gas is true, show gas amount as the X-Axis
-pub fn score_graph<G, GP, B>(gas: G, gp: GP, boost: B, x_axis: XAxis, plot_type: PlotType) -> DataSet
-where
-    G: Fn(usize) -> f64,
-    GP: Fn(usize) -> f64,
-    B: Fn(f64) -> f64
-{
-    let mut gas_prices = Vec::new();
-    let mut gases = Vec::new();
-    let mut scores = vec![0.0; DATA_LENGTH];
-    for i in 0..DATA_LENGTH {
-        gas_prices.push(gp(i));
-        gases.push(gas(i));
-    }
-
-    // reverse here because calculating from highest gp/gas -> lowest in parity-ethereum
-    let last_index = DATA_LENGTH - 1;
-    scores[last_index] = gas_prices[last_index];
-    for idx in (1..DATA_LENGTH).rev() {
-        let prev_idx = idx - 1;
-        let bump = ((21_000.0 * scores[idx]) /
-            gases[prev_idx]);
-        scores[prev_idx] = gas_prices[prev_idx] + (bump / 1000.0);
-        scores[idx] = boost(scores[prev_idx]);
-    }
-    scores[0] = boost(scores[0]);
-
-    let data = match x_axis {
-        XAxis::Gas => gases.iter().zip(scores.iter()).map(|(x, y)| (*x, *y)).collect::<Vec<(f64, f64)>>(),
-        XAxis::GasPrice => gas_prices.iter().zip(scores.iter()).map(|(x, y)| (*x, *y)).collect::<Vec<(f64, f64)>>(),
-    };
-
-    DataSet {data, x_axis, plot_type}
-}
-
 // X, Y; X = Gas  prices, Y = Score
-fn plot(Vec<DataSet>) {
+fn plot(data: Vec<DataSet>, name: String) {
 
-    let s1 = Scatter::from_vec(&data)
-        .style(scatter::Style::new()
-            .marker(Marker::Circle)
-            .colour("#000000")
-            .size(2.0));
-
-    let (range_x, range_y) = plot_type.range();
-    println!("{:?}", data);
+    let mut plots = Vec::new();
+    for d in data.iter() {
+        let s = Scatter::from_vec(d.payload.as_slice())
+            .style(scatter::Style::new()
+                  .colour(d.color.as_str())
+                  .size(2.0));
+        plots.push(s);
+    }
 
     let v = View::new()
-        .add(&s1)
-        .x_range(range_x.0, range_x.1)
-        .y_range(range_y.0, range_y.1)
-        .x_label(x_axis.name())
-        .y_label("Score");
-
-    // println!("{}", Page::single(&v).to_text());
+        .add(&plots[0])
+        .add(&plots[1])
+        .add(&plots[2])
+        .x_range(0.0, 200_000.0)
+        .y_range(0.0, 700_000_000.0)
+        .y_label("Some thing")
+        .x_label("Some another thing");
     // A page with a single view is then saved to an SVG file
-    Page::single(&v).save(plot_type.file_name());
+    Page::single(&v).save(name.as_str());
+}
+
+
+
+pub fn plot_gas_price() {
+
+    let opts = AlgOpts {
+        gas: |_| 21_000.0,
+        gp: |i: usize| (i * 1000) as f64,
+        boost: |score| ((score as u64) << 15) as f64,
+        plot_type: PlotType::ConstantGas
+    };
+    let mut data_set = Vec::new();
+    data_set.push(pr(opts.clone()));
+    data_set.push(option1(opts.clone()));
+    data_set.push(option2(opts));
+
+    plot(data_set, "Gas_Price.svg".into());
+}
+
+pub fn plot_gas() {
+
+    let opts = AlgOpts {
+        gas: |i| ((100.0) * (10.0 * i as f64)),
+        gp: |_| 21_000.0,
+        boost: |score| ((score as u64) << 15) as f64,
+        plot_type: PlotType::ConstantGasPrice
+    };
+
+    let mut data_set = Vec::new();
+    data_set.push(pr(opts.clone()));
+    data_set.push(option1(opts.clone()));
+    data_set.push(option2(opts));
+    // graphs::score_graph(|i| ((100.0) * (10.0 * i as f64)), |_| 21_000.0, |score| ((score as u64) << 15) as f64, XAxis::Gas, PlotType::ConstantGasPrice);// GOOD
+    plot(data_set, "Gas.svg".into());
 }
