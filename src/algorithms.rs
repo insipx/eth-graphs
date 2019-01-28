@@ -19,9 +19,9 @@ impl Algorithms {
 
     pub fn color(&self) -> String {
         match self {
-            Algorithms::PR => "#000000".to_string(),
-            Algorithms::Option1 => "#3503ff".to_string(),
-            Algorithms::Option2 => "#ff2600".to_string(),
+            Algorithms::PR => "#000000".to_string(), // black
+            Algorithms::Option1 => "#3503ff".to_string(),  // blue
+            Algorithms::Option2 => "#ff2600".to_string(), // red
         }
     }
 }
