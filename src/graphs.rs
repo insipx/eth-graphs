@@ -1,5 +1,5 @@
 use super::{DATA_LENGTH, PlotType, DataSet};
-use super::algorithms::{AlgOpts, pr, option1, option2};
+use super::algorithms::{AlgOpts, pr, option1, option2, gas_price_only};
 
 use plotlib::scatter::Scatter;
 use plotlib::scatter;
@@ -12,10 +12,7 @@ pub enum GraphType {
     GasPrice,
 }
 
-pub struct Range {
-    pub low: f64,
-    pub high: f64
-}
+pub struct Range(f64, f64);
 
 pub struct Axes {
     pub x: Range,
@@ -35,26 +32,14 @@ impl GraphType {
         match *self {
             GraphType::Gas => {
                 Axes {
-                    x: Range {
-                        low: 21_000.0,
-                        high: 250_000.0
-                    },
-                    y: Range {
-                        low: 688_000_000.0,
-                        high: 689_000_000.0
-                    }
+                    x: Range(21_000.0, 250_000.0),
+                    y: Range (688_100_000.0, 688_900_000.0)
                 }
             },
             GraphType::GasPrice => {
                 Axes {
-                    x: Range {
-                        low: 0.0,
-                        high: 250_000.0
-                    },
-                    y: Range {
-                        low: 0.0,
-                        high: 700_000_000.0
-                    }
+                    x: Range (0.0, 225_000.0),
+                    y: Range (0.0, 6_500_000_000.0)
                 }
             }
         }
@@ -78,8 +63,9 @@ fn plot(data: Vec<DataSet>, name: String, gtype: GraphType) {
         .add(&plots[0])
         .add(&plots[1])
         .add(&plots[2])
-        .x_range(gtype.range().x.low, gtype.range().x.high)
-        .y_range(gtype.range().y.low, gtype.range().y.high)
+        .add(&plots[3]) // Gas Price Only Scoring
+        .x_range(gtype.range().x.0, gtype.range().x.1)
+        .y_range(gtype.range().y.0, gtype.range().y.1)
         .y_label("Score")
         .x_label(gtype.axis());
     // A page with a single view is then saved to an SVG file
@@ -99,7 +85,8 @@ pub fn plot_gas_price() {
     let mut data_set = Vec::new();
     data_set.push(pr(opts.clone()));
     data_set.push(option1(opts.clone()));
-    data_set.push(option2(opts));
+    data_set.push(option2(opts.clone()));
+    data_set.push(gas_price_only(opts));
 
     plot(data_set, "Gas_Price.svg".into(), GraphType::GasPrice);
 }
@@ -116,7 +103,8 @@ pub fn plot_gas() {
     let mut data_set = Vec::new();
     data_set.push(pr(opts.clone()));
     data_set.push(option1(opts.clone()));
-    data_set.push(option2(opts));
+    data_set.push(option2(opts.clone()));
+    data_set.push(gas_price_only(opts));
     // graphs::score_graph(|i| ((100.0) * (10.0 * i as f64)), |_| 21_000.0, |score| ((score as u64) << 15) as f64, XAxis::Gas, PlotType::ConstantGasPrice);// GOOD
     plot(data_set, "Gas.svg".into(), GraphType::Gas);
 }
