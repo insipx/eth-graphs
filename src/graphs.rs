@@ -91,6 +91,9 @@ fn plot(data: Vec<DataSet>, name: String, gtype: GraphType) {
     Page::single(&v).save(name.as_str());
 }
 
+
+// Plots of all the different graph schemes. Parameters are decided through the closures.
+// Parameter to the closure for gas/gas price is commonly the index of an iterator (0..length) in order to generate linear gas/gas prices of increasing size
 pub fn plot_gas_price() {
 
     let opts = AlgOpts {
