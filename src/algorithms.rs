@@ -1,4 +1,4 @@
-use super::{DATA_LENGTH, PlotType, DataSet};
+use super::{PlotType, DataSet};
 
 pub enum Algorithms {
     // Issue,
@@ -13,11 +13,10 @@ pub struct AlgOpts<G: Fn(usize) -> f64, GP: Fn(usize) -> f64, B: Fn(f64) -> f64>
     pub gas: G,
     pub gp: GP,
     pub boost: B,
-    pub plot_type: PlotType
+    pub plot_type: PlotType,
 }
 
 impl Algorithms {
-
     pub fn color(&self) -> String {
         match self {
             Algorithms::PR => "#ff2600".to_string(), // black
@@ -28,19 +27,19 @@ impl Algorithms {
     }
 }
 
-pub fn pr<G, GP, B>(opts: AlgOpts<G, GP, B>) -> DataSet
+pub fn pr<G, GP, B>(opts: AlgOpts<G, GP, B>, length: usize) -> DataSet
 where
     G: Fn(usize) -> f64,
     GP: Fn(usize) -> f64,
     B: Fn(f64) -> f64
 {
-    let mut scores = vec![0.0; DATA_LENGTH];
-    let (gas, gas_price) = generate_gas_vectors(opts.gas, opts.gp);
+    let mut scores = vec![0.0; length];
+    let (gas, gas_price) = generate_gas_vectors(opts.gas, opts.gp, length);
 
     // reverse here because calculating from highest gp/gas -> lowest in parity-ethereum
-    let last_index = DATA_LENGTH - 1;
+    let last_index = length - 1;
     scores[last_index] = gas_price[last_index];
-    for idx in (1..DATA_LENGTH).rev() {
+    for idx in (1..length).rev() {
         let prev_idx = idx - 1;
         let bump = ((21_000.0 * scores[idx]) /
             gas[prev_idx]);
@@ -52,46 +51,46 @@ where
     collect_data(opts.plot_type, gas, gas_price, scores, Algorithms::color(&Algorithms::PR))
 }
 
-pub fn option1<G, GP, B>(opts: AlgOpts<G, GP, B>) -> DataSet
+pub fn option1<G, GP, B>(opts: AlgOpts<G, GP, B>, length: usize) -> DataSet
 where
     G: Fn(usize) -> f64,
     GP: Fn(usize) -> f64,
     B: Fn(f64) -> f64
 {
 
-    let mut scores = vec![0.0; DATA_LENGTH];
-    let (gas, gas_price) = generate_gas_vectors(opts.gas, opts.gp);
+    let mut scores = vec![0.0; length];
+    let (gas, gas_price) = generate_gas_vectors(opts.gas, opts.gp, length);
 
     // reverse here because calculating from highest gp/gas -> lowest in parity-ethereum
-    let last_index = DATA_LENGTH - 1;
+    let last_index = length - 1;
     scores[last_index] = gas_price[last_index];
-    for idx in (1..DATA_LENGTH).rev() {
+    for idx in (1..length).rev() {
         let prev_idx = idx - 1;
         let bump = ((21_000.0 * scores[idx]) /
             gas[prev_idx]);
         scores[prev_idx] = gas_price[prev_idx] + (bump / 1000.0);
     }
 
-    for idx in (0..DATA_LENGTH).rev() {
+    for idx in (0..length).rev() {
         scores[idx] = (opts.boost)(scores[idx]);
     }
 
     collect_data(opts.plot_type, gas, gas_price, scores, Algorithms::color(&Algorithms::Option1))
 }
 
-pub fn option2<G, GP, B>(opts: AlgOpts<G, GP, B>) -> DataSet
+pub fn option2<G, GP, B>(opts: AlgOpts<G, GP, B>, length: usize) -> DataSet
 where
     G: Fn(usize) -> f64,
     GP: Fn(usize) -> f64,
     B: Fn(f64) -> f64
 {
-    let mut scores = vec![0.0; DATA_LENGTH];
-    let (gas, gas_price) = generate_gas_vectors(opts.gas, opts.gp);
+    let mut scores = vec![0.0; length];
+    let (gas, gas_price) = generate_gas_vectors(opts.gas, opts.gp, length);
 
     // reverse here because calculating from highest gp/gas -> lowest in parity-ethereum
-    let last_index = DATA_LENGTH - 1;
+    let last_index = length - 1;
     scores[last_index] = (opts.boost)(gas_price[last_index]);
-    for idx in (1..DATA_LENGTH).rev() {
+    for idx in (1..length).rev() {
         let prev_idx = idx - 1;
         let bump = ((21_000.0 * scores[idx]) /
             gas[prev_idx]);
@@ -102,16 +101,16 @@ where
 }
 
 
-pub fn gas_price_only<G, GP, B>(opts: AlgOpts<G, GP, B>) -> DataSet
+pub fn gas_price_only<G, GP, B>(opts: AlgOpts<G, GP, B>, length: usize) -> DataSet
 where
     G: Fn(usize) -> f64,
     GP: Fn(usize) -> f64,
     B: Fn(f64) -> f64
 {
-    let mut scores = vec![0.0; DATA_LENGTH];
-    let (gas, gas_price) = generate_gas_vectors(opts.gas, opts.gp);
+    let mut scores = vec![0.0; length];
+    let (gas, gas_price) = generate_gas_vectors(opts.gas, opts.gp, length);
 
-    for i in 0..DATA_LENGTH {
+    for i in 0..length {
         scores[i] = (opts.boost)(gas_price[i]);
     }
 
@@ -119,7 +118,7 @@ where
 }
 
 // HELPERS
-fn generate_gas_vectors<G, GP>(gas: G, gas_price: GP) -> (Vec<f64>, Vec<f64>)
+fn generate_gas_vectors<G, GP>(gas: G, gas_price: GP, length: usize) -> (Vec<f64>, Vec<f64>)
 where
     G: Fn(usize) -> f64,
     GP: Fn(usize) -> f64
@@ -127,7 +126,7 @@ where
     let mut gas_prices = Vec::new();
     let mut gases = Vec::new();
 
-    for i in 0..DATA_LENGTH {
+    for i in 0..length {
         gas_prices.push(gas_price(i));
         gases.push(gas(i));
     }

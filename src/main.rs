@@ -1,8 +1,7 @@
 mod graphs;
 mod algorithms;
-
-pub const DATA_LENGTH: usize = 200;
-
+mod algorithm_avg;
+mod helpers;
 // gas price w/ boost
 
 #[derive(Debug)]
@@ -20,11 +19,9 @@ pub enum PlotType {
 
 fn main() {
 
-    let gas_price_multiplier = |i:usize| {
-        (i * 1000) as f64
-    };
-
     graphs::plot_gas_price();
     graphs::plot_gas();
+    graphs::plot_gas_price_avg();
+    graphs::plot_gas_avg();
 }
 

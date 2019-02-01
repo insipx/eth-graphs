@@ -1,5 +1,6 @@
-use super::{DATA_LENGTH, PlotType, DataSet};
+use super::{PlotType, DataSet};
 use super::algorithms::{AlgOpts, pr, option1, option2, gas_price_only};
+use super::algorithm_avg::{self, average_dataset};
 
 use plotlib::scatter::Scatter;
 use plotlib::scatter;
@@ -10,9 +11,11 @@ use plotlib::page::Page;
 pub enum GraphType {
     Gas,
     GasPrice,
+    GasAvg,
+    GasPriceAvg,
 }
 
-pub struct Range(f64, f64);
+pub struct Range(pub f64, pub f64);
 
 pub struct Axes {
     pub x: Range,
@@ -25,6 +28,7 @@ impl GraphType {
         match *self {
             GraphType::Gas => "Gas".to_string(),
             GraphType::GasPrice => "Gas Price".to_string(),
+            GraphType::GasAvg | GraphType::GasPriceAvg => "Number Consecutive Transactions".to_string(),
         }
     }
 
@@ -41,6 +45,18 @@ impl GraphType {
                     x: Range (0.0, 225_000.0),
                     y: Range (0.0, 6_500_000_000.0)
                 }
+            },
+            GraphType::GasAvg => {
+                Axes {
+                    x: Range (0.0, 200.0),
+                    y: Range(32_765_000_000.0, 32_805_000_000.0)
+                }
+            },
+            GraphType::GasPriceAvg => {
+                Axes {
+                    x: Range (0.0, 200.0),
+                    y: Range(0.0, 6_000_000_000.0)
+                }
             }
         }
     }
@@ -49,7 +65,6 @@ impl GraphType {
 
 // X, Y; X = Gas  prices, Y = Score
 fn plot(data: Vec<DataSet>, name: String, gtype: GraphType) {
-
     let mut plots = Vec::new();
     for d in data.iter() {
         let s = Scatter::from_vec(d.payload.as_slice())
@@ -72,23 +87,21 @@ fn plot(data: Vec<DataSet>, name: String, gtype: GraphType) {
     Page::single(&v).save(name.as_str());
 }
 
-
-
 pub fn plot_gas_price() {
 
     let opts = AlgOpts {
         gas: |_| 21_000.0,
         gp: |i: usize| (i * 1000) as f64,
         boost: |score| ((score as u64) << 15) as f64,
-        plot_type: PlotType::ConstantGas
+        plot_type: PlotType::ConstantGas,
     };
     let mut data_set = Vec::new();
-    data_set.push(pr(opts.clone()));
-    data_set.push(option1(opts.clone()));
-    data_set.push(option2(opts.clone()));
-    data_set.push(gas_price_only(opts));
+    data_set.push(pr(opts.clone(), 200));
+    data_set.push(option1(opts.clone(), 200));
+    data_set.push(option2(opts.clone(), 200));
+    data_set.push(gas_price_only(opts, 200));
 
-    plot(data_set, "Gas_Price.svg".into(), GraphType::GasPrice);
+    plot(data_set, "GasPrice.svg".into(), GraphType::GasPrice);
 }
 
 pub fn plot_gas() {
@@ -97,14 +110,50 @@ pub fn plot_gas() {
         gas: |i| 21_000.0 + ((100.0) * (10.0 * i as f64)),
         gp: |_| 21_000.0,
         boost: |score| ((score as u64) << 15) as f64,
-        plot_type: PlotType::ConstantGasPrice
+        plot_type: PlotType::ConstantGasPrice,
     };
 
     let mut data_set = Vec::new();
-    data_set.push(pr(opts.clone()));
-    data_set.push(option1(opts.clone()));
-    data_set.push(option2(opts.clone()));
-    data_set.push(gas_price_only(opts));
+    data_set.push(pr(opts.clone(), 200));
+    data_set.push(option1(opts.clone(), 200));
+    data_set.push(option2(opts.clone(), 200));
+    data_set.push(gas_price_only(opts, 200));
     // graphs::score_graph(|i| ((100.0) * (10.0 * i as f64)), |_| 21_000.0, |score| ((score as u64) << 15) as f64, XAxis::Gas, PlotType::ConstantGasPrice);// GOOD
     plot(data_set, "Gas.svg".into(), GraphType::Gas);
 }
+
+pub fn plot_gas_price_avg() {
+
+    let opts = AlgOpts {
+        gas: |_| 21_000.0,
+        gp: |i: usize| (i * 1000) as f64,
+        boost: |score| ((score as u64) << 15) as f64,
+        plot_type: PlotType::ConstantGas,
+    };
+    let mut data_set = Vec::new();
+    data_set.push(average_dataset(opts.clone(), option1));
+    data_set.push(average_dataset(opts.clone(), gas_price_only));
+    data_set.push(average_dataset(opts.clone(), option2));
+    data_set.push(average_dataset(opts, pr));
+    algorithm_avg::plot(data_set, "GasPriceAvg.svg".into(), GraphType::GasPriceAvg);
+}
+
+pub fn plot_gas_avg() {
+
+    let opts = AlgOpts {
+        gas: |i| 21_000.0 + ((100.0) * (10.0 * i as f64)),
+        gp: |_| 1_000_000.0,
+        boost: |score| ((score as u64) << 15) as f64,
+        plot_type: PlotType::ConstantGasPrice,
+    };
+
+    let mut data_set = Vec::new();
+    data_set.push(average_dataset(opts.clone(), option1));
+    data_set.push(average_dataset(opts.clone(), gas_price_only));
+    data_set.push(average_dataset(opts.clone(), option2));
+    data_set.push(average_dataset(opts, pr));
+    println!("DATA: {:?}", data_set[0].payload);
+    println!("DATA: {:?}", data_set[3].payload);
+    algorithm_avg::plot(data_set, "GasAvg.svg".into(), GraphType::GasAvg);
+}
+
