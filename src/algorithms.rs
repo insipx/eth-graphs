@@ -1,21 +1,12 @@
 use super::{PlotType, DataSet};
 
+
 pub enum Algorithms {
-    // Issue,
     PR,
     Option1,
     Option2,
     GasPriceOnly,
 }
-
-#[derive(Debug, Clone)]
-pub struct AlgOpts<G: Fn(usize) -> f64, GP: Fn(usize) -> f64, B: Fn(f64) -> f64> {
-    pub gas: G,
-    pub gp: GP,
-    pub boost: B,
-    pub plot_type: PlotType,
-}
-
 impl Algorithms {
     pub fn color(&self) -> String {
         match self {
@@ -25,6 +16,16 @@ impl Algorithms {
             Algorithms::GasPriceOnly => "#008711".to_string(), // green
         }
     }
+}
+
+// closures controlling how much Gas/Gas Price go up, and how much it is boosted by. PlotType is an indicator for whether the
+// gas or gas price is being kept constant
+#[derive(Debug, Clone)]
+pub struct AlgOpts<G: Fn(usize) -> f64, GP: Fn(usize) -> f64, B: Fn(f64) -> f64> {
+    pub gas: G,
+    pub gp: GP,
+    pub boost: B,
+    pub plot_type: PlotType,
 }
 
 pub fn pr<G, GP, B>(opts: AlgOpts<G, GP, B>, length: usize) -> DataSet
@@ -134,6 +135,7 @@ where
     (gases, gas_prices)
 }
 
+// Collect data depending on whether gas or gas price constant; this will decide whether gas or gas price is on X-Axis
 fn collect_data(plot_type: PlotType, gas: Vec<f64>, gas_price: Vec<f64>, scores: Vec<f64>, color: String) -> DataSet {
     let data = match plot_type {
         PlotType::ConstantGasPrice => gas.iter().zip(scores.iter()).map(|(x, y)| (*x, *y)).collect::<Vec<(f64, f64)>>(),

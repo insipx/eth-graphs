@@ -8,6 +8,8 @@ use plotlib::style::{Marker, Point};
 use plotlib::view::View;
 use plotlib::page::Page;
 
+
+// enum controlling the Ranges and graph types
 pub enum GraphType {
     Gas,
     GasPrice,
@@ -63,9 +65,11 @@ impl GraphType {
 }
 
 
-// X, Y; X = Gas  prices, Y = Score
+// X, Y; X = Gas  Y = Score
 fn plot(data: Vec<DataSet>, name: String, gtype: GraphType) {
     let mut plots = Vec::new();
+
+    // options for each data set
     for d in data.iter() {
         let s = Scatter::from_vec(d.payload.as_slice())
             .style(scatter::Style::new()
