@@ -55,7 +55,7 @@ impl GraphType {
             GraphType::GasPriceAvg => {
                 Axes {
                     x: Range (0.0, 200.0),
-                    y: Range(0.0, 6_000_000_000.0)
+                    y: Range(0.0, 3_500_000_000.0)
                 }
             }
         }
@@ -131,11 +131,12 @@ pub fn plot_gas_price_avg() {
         plot_type: PlotType::ConstantGas,
     };
     let mut data_set = Vec::new();
+    data_set.push(average_dataset(opts.clone(), pr));
     data_set.push(average_dataset(opts.clone(), option1));
-    data_set.push(average_dataset(opts.clone(), gas_price_only));
     data_set.push(average_dataset(opts.clone(), option2));
-    data_set.push(average_dataset(opts, pr));
-    algorithm_avg::plot(data_set, "GasPriceAvg.svg".into(), GraphType::GasPriceAvg);
+    data_set.push(average_dataset(opts, gas_price_only));
+
+    plot(data_set, "GasPriceAvg.svg".into(), GraphType::GasPriceAvg);
 }
 
 pub fn plot_gas_avg() {
@@ -148,12 +149,12 @@ pub fn plot_gas_avg() {
     };
 
     let mut data_set = Vec::new();
+
+    data_set.push(average_dataset(opts.clone(), pr));
     data_set.push(average_dataset(opts.clone(), option1));
-    data_set.push(average_dataset(opts.clone(), gas_price_only));
     data_set.push(average_dataset(opts.clone(), option2));
-    data_set.push(average_dataset(opts, pr));
-    println!("DATA: {:?}", data_set[0].payload);
-    println!("DATA: {:?}", data_set[3].payload);
-    algorithm_avg::plot(data_set, "GasAvg.svg".into(), GraphType::GasAvg);
+    data_set.push(average_dataset(opts, gas_price_only));
+
+    plot(data_set, "GasAvg.svg".into(), GraphType::GasAvg);
 }
 

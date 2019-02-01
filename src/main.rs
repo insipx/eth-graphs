@@ -19,9 +19,9 @@ pub enum PlotType {
 
 fn main() {
 
-    graphs::plot_gas_price();
-    graphs::plot_gas();
-    graphs::plot_gas_price_avg();
+    // graphs::plot_gas_price();
+    // graphs::plot_gas();
+    // graphs::plot_gas_price_avg();
     graphs::plot_gas_avg();
 }
 

@@ -19,9 +19,9 @@ pub struct AlgOpts<G: Fn(usize) -> f64, GP: Fn(usize) -> f64, B: Fn(f64) -> f64>
 impl Algorithms {
     pub fn color(&self) -> String {
         match self {
-            Algorithms::PR => "#ff2600".to_string(), // black
+            Algorithms::PR => "#ff2600".to_string(), // red
             Algorithms::Option1 => "#3503ff".to_string(),  // blue
-            Algorithms::Option2 => "#000000".to_string(), // red
+            Algorithms::Option2 => "#000000".to_string(), // black
             Algorithms::GasPriceOnly => "#008711".to_string(), // green
         }
     }

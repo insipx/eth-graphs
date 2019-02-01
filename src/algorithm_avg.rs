@@ -35,27 +35,5 @@ where
     }
 }
 
-pub fn plot(data: Vec<DataSet>, name: String, gtype: GraphType) {
 
-    let mut plots = Vec::new();
-    for d in data.iter() {
-        let s = Scatter::from_vec(d.payload.as_slice())
-            .style(scatter::Style::new()
-                  .colour(d.color.as_str())
-                  .size(2.0));
-        plots.push(s);
-    }
-
-    let v = View::new()
-        .add(&plots[0])
-        .add(&plots[1]) // Gas Price Only Scoring
-        .add(&plots[2])
-        .add(&plots[3])
-        .x_range(gtype.range().x.0, gtype.range().x.1)
-        .y_range(gtype.range().y.0, gtype.range().y.1)
-        .y_label("Score")
-        .x_label(gtype.axis());
-    // A page with a single view is then saved to an SVG file
-    Page::single(&v).save(name.as_str());
-}
 
