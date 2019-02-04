@@ -39,15 +39,13 @@ where
 
     // reverse here because calculating from highest gp/gas -> lowest in parity-ethereum
     let last_index = length - 1;
-    scores[last_index] = gas_price[last_index];
+    scores[last_index] = (opts.boost)(gas_price[last_index]);
     for idx in (1..length).rev() {
         let prev_idx = idx - 1;
         let bump = ((21_000.0 * scores[idx]) /
             gas[prev_idx]);
-        scores[prev_idx] = gas_price[prev_idx] + (bump / 1000.0);
-        scores[idx] = (opts.boost)(scores[prev_idx]);
+        scores[prev_idx] = (opts.boost)(gas_price[prev_idx]) + (bump / 1000.0);
     }
-    scores[0] = (opts.boost)(scores[0]);
 
     collect_data(opts.plot_type, gas, gas_price, scores, Algorithms::color(&Algorithms::PR))
 }

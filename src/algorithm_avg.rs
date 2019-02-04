@@ -21,7 +21,11 @@ where
 {
     let mut averages = Vec::new();
     let mut result = None;
-    for i in 2..200 {
+    for i in 1..200 {
+        // will be the same for every algorithm. just the gas price.
+        if i == 1 {
+            averages.push((i as f64, (opts.gp)(1)));
+        }
         let data = fun(opts.clone(), i);
         averages.push((i as f64, average(data.payload.iter().map(|(x, y)| *y).collect::<Vec<f64>>())));
         result = Some(data)

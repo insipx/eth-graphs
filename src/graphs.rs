@@ -39,25 +39,26 @@ impl GraphType {
             GraphType::Gas => {
                 Axes {
                     x: Range(21_000.0, 250_000.0),
-                    y: Range (688_100_000.0, 688_900_000.0)
+                    y: Range (1_000_000.0, 1_001_000.0)
                 }
             },
             GraphType::GasPrice => {
                 Axes {
-                    x: Range (0.0, 225_000.0),
-                    y: Range (0.0, 6_500_000_000.0)
+                    x: Range (0.0, 200_000.0),
+                    y: Range (0.0, 225_000.0)
                 }
             },
             GraphType::GasAvg => {
                 Axes {
                     x: Range (0.0, 200.0),
-                    y: Range(32_765_000_000.0, 32_805_000_000.0)
+                    // y: Range(32_765_000_000.0, 32_805_000_000.0)
+                    y: Range(1_000_000.0, 1_001_000.0)
                 }
             },
             GraphType::GasPriceAvg => {
                 Axes {
                     x: Range (0.0, 200.0),
-                    y: Range(0.0, 3_500_000_000.0)
+                    y: Range(1_000_000.0, 2_000_000.0)
                 }
             }
         }
@@ -99,7 +100,7 @@ pub fn plot_gas_price() {
     let opts = AlgOpts {
         gas: |_| 21_000.0,
         gp: |i: usize| (i * 1000) as f64,
-        boost: |score| ((score as u64) << 15) as f64,
+        boost: |score| score,
         plot_type: PlotType::ConstantGas,
     };
     let mut data_set = Vec::new();
@@ -115,8 +116,8 @@ pub fn plot_gas() {
 
     let opts = AlgOpts {
         gas: |i| 21_000.0 + ((100.0) * (10.0 * i as f64)),
-        gp: |_| 21_000.0,
-        boost: |score| ((score as u64) << 15) as f64,
+        gp: |_| 1_000_000.0,
+        boost: |score| score,
         plot_type: PlotType::ConstantGasPrice,
     };
 
@@ -125,7 +126,6 @@ pub fn plot_gas() {
     data_set.push(option1(opts.clone(), 200));
     data_set.push(option2(opts.clone(), 200));
     data_set.push(gas_price_only(opts, 200));
-    // graphs::score_graph(|i| ((100.0) * (10.0 * i as f64)), |_| 21_000.0, |score| ((score as u64) << 15) as f64, XAxis::Gas, PlotType::ConstantGasPrice);// GOOD
     plot(data_set, "Gas.svg".into(), GraphType::Gas);
 }
 
@@ -133,8 +133,8 @@ pub fn plot_gas_price_avg() {
 
     let opts = AlgOpts {
         gas: |_| 21_000.0,
-        gp: |i: usize| (i * 1000) as f64,
-        boost: |score| ((score as u64) << 15) as f64,
+        gp: |i| 1_000_000.0,
+        boost: |score| score,
         plot_type: PlotType::ConstantGas,
     };
     let mut data_set = Vec::new();
@@ -149,19 +149,18 @@ pub fn plot_gas_price_avg() {
 pub fn plot_gas_avg() {
 
     let opts = AlgOpts {
-        gas: |i| 21_000.0 + ((100.0) * (10.0 * i as f64)),
+        gas: |_| 21_000.0,
         gp: |_| 1_000_000.0,
-        boost: |score| ((score as u64) << 15) as f64,
+        boost: |score| score,
         plot_type: PlotType::ConstantGasPrice,
     };
 
     let mut data_set = Vec::new();
 
+    data_set.push(average_dataset(opts.clone(), gas_price_only));
     data_set.push(average_dataset(opts.clone(), pr));
     data_set.push(average_dataset(opts.clone(), option1));
     data_set.push(average_dataset(opts.clone(), option2));
-    data_set.push(average_dataset(opts, gas_price_only));
-
     plot(data_set, "GasAvg.svg".into(), GraphType::GasAvg);
 }
 
