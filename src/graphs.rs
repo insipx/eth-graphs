@@ -58,7 +58,7 @@ impl GraphType {
             GraphType::GasPriceAvg => {
                 Axes {
                     x: Range (0.0, 200.0),
-                    y: Range(1_000_000.0, 2_000_000.0)
+                    y: Range(1_000_000.0, 1_001_000.0)
                 }
             }
         }
